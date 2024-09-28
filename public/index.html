@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloud CDN File Uploader</title>
+    <meta
+      name="description"
+      content="With our global CDN, upload your files anywhere with exceptional speed and reliability."
+    />
+    <link rel="icon" class=js-site-favicon type=image/ico
+    href="https://cdn.jsdelivr.net/gh/SazumiVicky/Storage@main/sazumiviki-ico.ico">
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Cloud CDN File Uploader</h1>
+        <p>Made With <span class="heart">❤️</span> by Romi ~</p>
+      </div>
+      <form id="uploadForm">
+        <label for="fileInput" class="file-label"
+          ><i class="far fa-folder"></i> Choose a file or drop it here...</label
+        >
+        <input type="file" name="file" id="fileInput" />
+        <button type="submit" class="upload-button">Upload</button>
+      </form>
+      <div class="preview" id="preview"></div>
+      <div class="history">
+        <h2>History:</h2>
+        <hr />
+        <div id="history"></div>
+      </div>
+      <div class="stats">
+        <div class="stats-box">
+          <p>Total Files</p>
+          <p id="totalFiles"><i class="fas fa-spinner fa-spin"></i></p>
+        </div>
+        <div class="stats-box">
+          <p>Total Size</p>
+          <p id="totalSize"><i class="fas fa-spinner fa-spin"></i></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-you">
+      <h2>About You</h2>
+      <p>IP Address: <span id="ipAddress"></span></p>
+      <p>Country: <span id="country"></span></p>
+      <p>Region: <span id="region"></span></p>
+      <p>Zip Code: <span id="zipCode"></span></p>
+      <p>Languages: <span id="languages"></span></p>
+      <p>Time Zone: <span id="timeZone"></span></p>
+    </div>
+    <footer class="footer">
+      Developed by Romi Muharom - <span id="currentYear"></span>
+    </footer>
+    <script src="index.js"></script>
+  </body>
+</html>
