@@ -103,55 +103,51 @@ document.getElementById("fileInput").addEventListener("drop", function (e) {
   displayPreview(file);
 });
 
-document
-  .getElementById("uploadForm")
-  .addEventListener("submit", function uploadHandler(e) {
-    e.preventDefault();
-    const uploadButton = document.querySelector(".upload-button");
-    const fileInput = document.getElementById("fileInput");
-    const file = fileInput.files[0];
+document.getElementById("uploadForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const uploadButton = document.querySelector(".upload-button");
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
 
-    if (!file) {
-      showPopup("No files selected", "error");
-      return;
-    }
+  if (!file) {
+    showPopup("No files selected", "error");
+    return;
+  }
 
-    if (file.size > 50 * 1024 * 1024) {
-      showPopup("File Size Exceeds 50MB", "error");
-      return;
-    }
+  if (file.size > 50 * 1024 * 1024) {
+    showPopup("File Size Exceeds 50MB", "error");
+    return;
+  }
 
-    uploadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    uploadButton.disabled = true;
+  uploadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  uploadButton.disabled = true;
 
-    const formData = new FormData();
-    formData.append("fileInput", file);
+  const formData = new FormData();
+  formData.append("fileInput", file);
 
-    fetch("/upload", {
-      method: "POST",
-      body: formData,
+  fetch("/upload", {
+    method: "POST",
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      uploadButton.innerHTML = "Refresh";
+      uploadButton.disabled = false;
+      showPopup("File Uploaded", "success");
+      updateHistory(data.url_response);
+
+      uploadButton.onclick = function () {
+        location.reload();
+      };
     })
-      .then((response) => response.json())
-      .then((data) => {
-        uploadButton.innerHTML = "Refresh";
-        uploadButton.disabled = false;
-        showPopup("File Uploaded", "success");
-        const fileUrl = data.url_response;
-        updateHistory(fileUrl);
-        saveToLocalStorage(fileUrl);
-        document
-          .getElementById("uploadForm")
-          .removeEventListener("submit", uploadHandler);
-        uploadButton.onclick = function () {
-          location.reload();
-        };
-      })
-      .catch((error) => {
-        uploadButton.innerHTML = "Upload";
-        uploadButton.disabled = false;
-        showPopup("Oops Something Went Wrong", "error");
-      });
-  });
+    .catch((error) => {
+      uploadButton.innerHTML = "Upload";
+      uploadButton.disabled = false;
+      showPopup("Oops Something Went Wrong", "error");
+    });
+});
+
+
 
 function displayPreview(file) {
   const preview = document.getElementById("preview");
@@ -186,6 +182,7 @@ function updateHistory(url) {
     e.preventDefault();
     copyToClipboard(url);
   });
+
   history.appendChild(link);
 }
 
@@ -205,29 +202,28 @@ function saveToLocalStorage(url) {
 }
 
 function loadHistory() {
-  fetch('/history')
-    .then(response => response.json())
-    .then(data => {
-      const historyContainer = document.getElementById('history');
-      historyContainer.innerHTML = '';
+  fetch("/history")
+    .then((response) => response.json())
+    .then((data) => {
+      const historyContainer = document.getElementById("history");
+      historyContainer.innerHTML = "";
       if (data.fileName && data.url) {
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = data.url;
         link.textContent = `${data.fileName} (${data.size})`;
         historyContainer.appendChild(link);
       } else if (data.message) {
         historyContainer.textContent = data.message;
       } else {
-        historyContainer.textContent = 'Unknown error';
+        historyContainer.textContent = "Unknown error";
       }
     })
-    .catch(error => {
-      console.error('Error loading history:', error);
-      const historyContainer = document.getElementById('history');
-      historyContainer.textContent = 'Error fetching history';
+    .catch((error) => {
+      console.error("Error loading history:", error);
+      const historyContainer = document.getElementById("history");
+      historyContainer.textContent = "Error fetching history";
     });
 }
-
 
 function showPopup(message, type = "error") {
   const popup = document.createElement("div");
@@ -245,13 +241,13 @@ function showPopup(message, type = "error") {
 }
 
 function fetchStats() {
-  fetch('/files')
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('totalFiles').textContent = data.totalFiles;
-      document.getElementById('totalSize').textContent = data.totalSize;
+  fetch("/files")
+    .then((response) => response.json())
+    .then((data) => {
+      document.getElementById("totalFiles").textContent = data.totalFiles;
+      document.getElementById("totalSize").textContent = data.totalSize;
     })
-    .catch(error => console.error('Error fetching stats:', error));
+    .catch((error) => console.error("Error fetching stats:", error));
 }
 
 setInterval(fetchStats, 5000);
