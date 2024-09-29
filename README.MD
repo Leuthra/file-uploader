@@ -157,6 +157,15 @@ uploadFile('/path/to/your/file.jpg');
 - `package.json`: Project dependencies and scripts.
 - `firebaseServiceAccountKey.json`: Firebase service account key (if using Firebase storage).
 
+## Next Features (Coming Soon)
+Here are some of the features planned for future releases:
+
+- File Expiration: Add an option to automatically delete files after a specified time.
+- Multiple File Upload: Support for uploading multiple files simultaneously.
+- Free Deploy: Support deploy any hosting
+- Library: Available at npmjs
+- Google Drive: Additions to the file storage
+
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request.
