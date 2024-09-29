@@ -1,58 +1,79 @@
-# Firebase - UPLOADER
+# Multi-Storage File Uploader
 
-This project is a web-based file uploader built with Node.js, Express, and Firebase. It allows users to upload files with a size limit of 50MB and provides a simple interface for managing uploads.
+This project is a web-based file uploader built with Node.js and Express, supporting two storage options: **Firebase** or **Local storage**. You can configure the storage method via environment variables. Users can upload files up to a size limit of 50MB, and the app provides a simple interface for managing uploads.
 
 ## Features
 
-- File upload with a size limit of 50MB
-- File storage on Firebase
-- Simple and clean user interface
-- Donation popup for user contributions
+- **Multi-Storage Option**: Switch between Firebase Storage or Local storage using environment configuration.
+- File upload with a size limit of 50MB.
+- File management and history.
+- Simple and clean user interface with copy-to-clipboard functionality for uploaded file links.
+- Option to proxy Firebase Storage files through the local server.
 
 ## Technologies Used
 
 - Node.js
 - Express
-- Firebase
+- Firebase (optional)
 - Multer
 - HTML/CSS/JavaScript
 
 ## Installation
 
 1. Clone the repository:
-    ```sh
-    git clone https://github.com/Leuthra/uploader.git
-    cd uploader
-    ```
+
+   ```bash
+   git clone https://github.com/Leuthra/file-uploader.git
+   cd file-uploader
+   ```
 
 2. Install the dependencies:
-    ```sh
-    npm install --save
-    ```
 
-3. **Create the `firebaseServiceAccountKey.json` file**:
+   ```bash
+   npm install
+   ```
 
-    To use Firebase Admin SDK, you need a **service account key** file for authentication. Follow these steps to create the file:
+3. Create a `.env` file in the root directory and configure your storage options.
 
-    - Go to the [Firebase Console](https://console.firebase.google.com/).
-    - Select your project.
-    - In the left sidebar, click on **Project Settings** (gear icon).
-    - Go to the **Service accounts** tab.
-    - Click the **Generate new private key** button at the bottom of the page.
-    - This will download a JSON file. Rename this file to `firebaseServiceAccountKey.json` and place it in the root directory of your project.
+   - For **local storage**:
 
-4. Create a `.env` file in the root directory and add your Firebase credentials:
-    ```env
-    FIREBASE_STORAGE_BUCKET=your-firebase-storage-bucket-url
-    PUBLIC_URL=http://localhost:3000/uploads
-    ```
+     ```env
+     STORAGE=local
+     PUBLIC_URL=http://localhost:3000/uploads
+     ```
 
-    Make sure to replace `your-firebase-storage-bucket-url` with the actual Firebase storage bucket URL found in your Firebase project settings.
+   - For **Firebase storage**, you need a Firebase service account:
+
+     ```env
+     STORAGE=firebase
+     FIREBASE_STORAGE_BUCKET=your-firebase-storage-bucket-url
+     PUBLIC_URL=https://your-firebase-storage-url
+     ```
+
+4. If you choose **Firebase Storage** as your storage option, you'll need to set up your **Firebase service account**:
+
+   - Download the service account key JSON from Firebase Console.
+   - Place the file in the root of the project as `firebaseServiceAccountKey.json`.
+
+   The JSON file should look something like this:
+
+   ```json
+   {
+     "type": "service_account",
+     "project_id": "your-project-id",
+     "private_key_id": "your-private-key-id",
+     "private_key": "your-private-key",
+     "client_email": "your-client-email",
+     "client_id": "your-client-id",
+     ...
+   }
+   ```
 
 5. Start the server:
-    ```sh
-    npm start
-    ```
+
+   ```bash
+   npm start
+   ```
 
 6. Open your browser and navigate to `http://localhost:3000`.
 
@@ -61,47 +82,80 @@ This project is a web-based file uploader built with Node.js, Express, and Fireb
 1. Select a file to upload using the file input.
 2. Click the "Upload" button to start the upload process.
 3. Wait for the upload to complete and see the status message.
-4. The uploaded file URL will be displayed in the upload history.
+4. After the upload:
+   - You can copy the link of the uploaded file.
+   - When you reload the page, the history will display the latest file that was uploaded.
 
-## File Structure
+## Multi-Storage Configuration
 
-- `public/`: Contains static files (HTML, CSS, JavaScript)
-- `server.js`: Main server file
-- `Dockerfile`: Docker configuration
-- `package.json`: Project dependencies and scripts
+### Local Storage
 
-## API Docs Example
+By setting `STORAGE=local` in the `.env` file, files will be saved locally on the server in the `public/uploads` directory. The file history and access will be based on this local storage.
+
+- Example `.env` for local storage:
+
+  ```env
+  STORAGE=local
+  PUBLIC_URL=http://localhost:3000/uploads
+  ```
+
+### Firebase Storage
+
+By setting `STORAGE=firebase` in the `.env` file, files will be uploaded to Firebase Storage, and the history will show files hosted on Firebase. The app will proxy Firebase files through the local server for easy access.
+
+- Example `.env` for Firebase storage:
+
+  ```env
+  STORAGE=firebase
+  FIREBASE_STORAGE_BUCKET=your-firebase-storage-bucket-url
+  PUBLIC_URL=https://your-firebase-storage-url
+  ```
+
+- Ensure you have set up the `firebaseServiceAccountKey.json` file correctly as explained in the installation section.
+
+## API Documentation
+
+Here’s an example of how you can use the API to upload a file:
+
+### Uploading a File via API
 
 ```js
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 const fs = require('fs');
 
-async function romiCdn(filePath) {
+async function uploadFile(filePath) {
   const formData = new FormData();
   formData.append('fileInput', fs.createReadStream(filePath));
 
   try {
-    const response = await fetch('https://localhost:3000/upload', {
+    const response = await fetch('http://localhost:3000/upload', {
       method: 'POST',
-      body: formData
+      body: formData,
     });
 
     if (response.ok) {
-      const fileUrl = await response.json();
-      console.log('Successfully:', fileUrl);
+      const result = await response.json();
+      console.log('Uploaded successfully:', result.url_response);
     } else {
       const errorResponse = await response.json();
-      console.error('Oops something went wrong:', errorResponse);
+      console.error('Upload failed:', errorResponse);
     }
   } catch (error) {
-    console.error('Oops something went wrong:', error.message);
+    console.error('Error:', error.message);
   }
 }
 
 // Example usage:
-romiCdn('/path/to/your/file.jpg');
+uploadFile('/path/to/your/file.jpg');
 ```
+
+## File Structure
+
+- `public/`: Contains static files (HTML, CSS, JavaScript).
+- `server.js`: Main server file.
+- `package.json`: Project dependencies and scripts.
+- `firebaseServiceAccountKey.json`: Firebase service account key (if using Firebase storage).
 
 ## Contributing
 
@@ -121,4 +175,4 @@ Developed by Romi Muharom
 
 ## Thank You
 
-Special thanks to **[SazumiVicky/uploader-r2](https://github.com/SazumiVicky/uploader-r2/)** for providing the base reference for the uploader functionality in this project.
+Special thanks to [SazumiVicky](https://github.com/SazumiVicky/uploader-r2) for the reference code used in the uploader system.
