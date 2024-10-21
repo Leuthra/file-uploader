@@ -103,8 +103,11 @@ document.getElementById("fileInput").addEventListener("drop", function (e) {
   displayPreview(file);
 });
 
+let uploadCompleted = false;
+
 document.getElementById("uploadForm").addEventListener("submit", function (e) {
   e.preventDefault();
+
   const uploadButton = document.querySelector(".upload-button");
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
@@ -116,6 +119,11 @@ document.getElementById("uploadForm").addEventListener("submit", function (e) {
 
   if (file.size > 50 * 1024 * 1024) {
     showPopup("File Size Exceeds 50MB", "error");
+    return;
+  }
+
+  if (uploadCompleted) {
+    location.reload();
     return;
   }
 
@@ -135,10 +143,7 @@ document.getElementById("uploadForm").addEventListener("submit", function (e) {
       uploadButton.disabled = false;
       showPopup("File Uploaded", "success");
       updateHistory(data.url_response);
-
-      uploadButton.onclick = function () {
-        location.reload();
-      };
+      uploadCompleted = true;
     })
     .catch((error) => {
       uploadButton.innerHTML = "Upload";
@@ -146,8 +151,6 @@ document.getElementById("uploadForm").addEventListener("submit", function (e) {
       showPopup("Oops Something Went Wrong", "error");
     });
 });
-
-
 
 function displayPreview(file) {
   const preview = document.getElementById("preview");

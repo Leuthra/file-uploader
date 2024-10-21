@@ -1,187 +1,147 @@
-# Multi-Storage File Uploader
+# CDN File Uploader
 
-This project is a web-based file uploader built with Node.js and Express, supporting two storage options: **Firebase** or **Local storage**. You can configure the storage method via environment variables. Users can upload files up to a size limit of 50MB, and the app provides a simple interface for managing uploads.
+A file uploader built with Node.js and Express that supports multiple file types, including images, documents, videos, presentations, and spreadsheets. The project includes MIME type validation to ensure only specific file types are uploaded. It also supports multiple storage options, including local storage, and Firebase Storage.
 
 ## Features
+- Supports file upload for images, videos, gifs, documents (PDF, DOC, DOCX), presentations (PPT, PPTX), and spreadsheets (XLS, XLSX).
+- MIME type and extension validation for uploaded files.
+- Supports three different storage options: **Local**, and **Firebase**.
+- Configurable via environment variables.
+- **Vercel-ready**: This project can be easily deployed to Vercel for hosting.
 
-- **Multi-Storage Option**: Switch between Firebase Storage or Local storage using environment configuration.
-- File upload with a size limit of 50MB.
-- File management and history.
-- Simple and clean user interface with copy-to-clipboard functionality for uploaded file links.
-- Option to proxy Firebase Storage files through the local server.
-
-## Technologies Used
-
-- Node.js
-- Express
-- Firebase (optional)
-- Multer
-- HTML/CSS/JavaScript
+## Tech Stack
+- **Node.js**
+- **Express.js**
+- **Multer**: For handling file uploads.
+- **fs (File System)**: For file handling in the local filesystem.
+- **Firebase Admin SDK**: For Firebase storage (if using Firebase).
+- **dotenv**: For environment variable management.
 
 ## Installation
 
-1. Clone the repository:
-
+1. Clone this repository:
    ```bash
-   git clone https://github.com/Leuthra/file-uploader.git
-   cd file-uploader
+   git clone https://github.com/Leuthra/cdn-uploader.git
+   cd cdn-uploader
    ```
 
-2. Install the dependencies:
-
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-3. Create a `.env` file in the root directory and configure your storage options.
-
-   - For **local storage**:
-
-     ```env
-     STORAGE=local
-     PUBLIC_URL=http://localhost:3000/uploads
-     ```
-
-   - For **Firebase storage**, you need a Firebase service account:
-
-     ```env
-     STORAGE=firebase
-     FIREBASE_STORAGE_BUCKET=your-firebase-storage-bucket-url
-     PUBLIC_URL=https://your-firebase-storage-url
-     ```
-
-4. If you choose **Firebase Storage** as your storage option, you'll need to set up your **Firebase service account**:
-
-   - Download the service account key JSON from Firebase Console.
-   - Place the file in the root of the project as `firebaseServiceAccountKey.json`.
-
-   The JSON file should look something like this:
-
-   ```json
-   {
-     "type": "service_account",
-     "project_id": "your-project-id",
-     "private_key_id": "your-private-key-id",
-     "private_key": "your-private-key",
-     "client_email": "your-client-email",
-     "client_id": "your-client-id",
-     ...
-   }
+3. Create a `.env` file to configure environment variables:
+   ```bash
+   touch .env
    ```
 
-5. Start the server:
+   **Example `.env` file:**
+   ```bash
+   # System environment variables
+   PORT=3000
+   PUBLIC_URL=http://localhost:3000
+   STORAGE=local  # Options: 'local', 'firebase'
 
+   # Firebase environment variables (if using Firebase)
+   FIREBASE_STORAGE_BUCKET=gs://your-firebase-bucket
+   PUBLIC_URL_FIREBASE=https://firebasestorage.googleapis.com/v0/b/your-firebase-bucket/o
+   ```
+
+4. Start the server:
    ```bash
    npm start
    ```
 
-6. Open your browser and navigate to `http://localhost:3000`.
+## Environment Variables
+
+| Variable Name                | Description                                              | Default Value    |
+| ---------------------------- | -------------------------------------------------------- | ---------------- |
+| `PORT`                       | Port number for the server                               | `3000`           |
+| `PUBLIC_URL`                 | Public URL for accessing the app                         | `http://localhost:3000` |
+| `STORAGE`                    | Storage option (`local`, `firebase`, or `drive`)         | `local`          |
+| `FIREBASE_STORAGE_BUCKET`     | Firebase storage bucket name (only if using Firebase)    | N/A              |
+| `PUBLIC_URL_FIREBASE`         | Public URL template for Firebase storage                 | N/A              |
+
+## Storage Options
+
+This project supports three different storage options. You can choose the storage method by setting the `STORAGE` variable in your `.env` file to either `local`, `firebase`.
+
+### 1. Local Storage
+Files are stored on the server's filesystem in the `uploads/` directory, which acts as local storage. Files will be served via the `/file` route, even if stored locally.
+
+### 2. Firebase Storage
+To use Firebase Storage, set the `STORAGE` variable to `firebase` and configure the Firebase-specific environment variables such as `FIREBASE_STORAGE_BUCKET`. Uploaded files will still be accessed using the `/file` route.
+
+You can find more detailed setup instructions in the [**FIREBASE.md**](./FIREBASE.md) file.
 
 ## Usage
 
-1. Select a file to upload using the file input.
-2. Click the "Upload" button to start the upload process.
-3. Wait for the upload to complete and see the status message.
-4. After the upload:
-   - You can copy the link of the uploaded file.
-   - When you reload the page, the history will display the latest file that was uploaded.
+1. **File Upload**: 
+   Send a `POST` request to `/upload` with a file using the form field `fileInput`. The file will be saved in the specified storage method (local, Firebase, or Google Drive).
 
-## Multi-Storage Configuration
+   Example with **cURL**:
+   ```bash
+   curl -X POST http://localhost:3000/upload -F "fileInput=@/path/to/your/file.jpg"
+   ```
 
-### Local Storage
+2. **Allowed File Types**:
+   The following file types are allowed for upload:
+   - Images: `.jpeg`, `.jpg`, `.png`, `.gif`
+   - Documents: `.pdf`, `.doc`, `.docx`
+   - Presentations: `.ppt`, `.pptx`
+   - Spreadsheets: `.xls`, `.xlsx`
+   - Videos: `.mp4`, `.avi`, `.mov`, `.mkv`
 
-By setting `STORAGE=local` in the `.env` file, files will be saved locally on the server in the `public/uploads` directory. The file history and access will be based on this local storage.
+3. **Access Uploaded Files**:
+   All uploaded files, regardless of the storage method (local, Firebase, or Google Drive), will be accessible through the `/file` route. For example:
 
-- Example `.env` for local storage:
+   - **Local Storage**: `http://localhost:3000/file/your-file-name`
+   - **Firebase Storage**: `http://localhost:3000/file/your-file-name`
+   - **Google Drive**: `http://localhost:3000/file/your-file-name`
 
-  ```env
-  STORAGE=local
-  PUBLIC_URL=http://localhost:3000/uploads
-  ```
+## Hosting on Vercel
 
-### Firebase Storage
+This project is fully compatible with **Vercel**. You can easily deploy it by pushing the repository to a GitHub repository and connecting it with Vercel. The configuration file `vercel.json` is included to handle deployment.
 
-By setting `STORAGE=firebase` in the `.env` file, files will be uploaded to Firebase Storage, and the history will show files hosted on Firebase. The app will proxy Firebase files through the local server for easy access.
+Once deployed, all files will be accessible via the `/file` route on your Vercel domain. The **uploads/** folder is used for local storage when the `STORAGE` is set to `local`.
 
-- Example `.env` for Firebase storage:
+### Steps to Deploy on Vercel:
 
-  ```env
-  STORAGE=firebase
-  FIREBASE_STORAGE_BUCKET=your-firebase-storage-bucket-url
-  PUBLIC_URL=https://your-firebase-storage-url
-  ```
+1. Push your project to GitHub or GitLab.
+2. Go to [Vercel](https://vercel.com/), sign in, and create a new project by importing your repository.
+3. Set the required environment variables in the Vercel project settings.
+4. Deploy the project.
 
-- Ensure you have set up the `firebaseServiceAccountKey.json` file correctly as explained in the installation section.
+## Project Structure
 
-## API Documentation
-
-Here’s an example of how you can use the API to upload a file:
-
-### Uploading a File via API
-
-```js
-const fetch = require('node-fetch');
-const FormData = require('form-data');
-const fs = require('fs');
-
-async function uploadFile(filePath) {
-  const formData = new FormData();
-  formData.append('fileInput', fs.createReadStream(filePath));
-
-  try {
-    const response = await fetch('http://localhost:3000/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      console.log('Uploaded successfully:', result.url_response);
-    } else {
-      const errorResponse = await response.json();
-      console.error('Upload failed:', errorResponse);
-    }
-  } catch (error) {
-    console.error('Error:', error.message);
-  }
-}
-
-// Example usage:
-uploadFile('/path/to/your/file.jpg');
+```
+.
+├── config/                 # Configuration files (e.g., Firebase)
+├── controllers/            # Route controllers for handling requests
+├── middlewares/            # Custom middleware (e.g., IP handling, validation)
+├── public/                 # Public assets (e.g., HTML, CSS, JS files)
+├── routes/                 # Express routes
+├── uploads/                # Directory where uploaded files are stored (local storage only)
+├── utils/                  # Utility functions (e.g., helpers for file handling)
+├── .env                    # Environment variables configuration (to be created)
+├── .gitignore              # Git ignore file
+├── firebase.json           # Firebase configuration (if applicable)
+├── package.json            # Node.js dependencies and scripts
+├── README.md               # Project documentation
+├── server.js               # Main server file
+├── vercel.json             # Vercel deployment configuration
+├── FIREBASE.md             # Firebase setup instructions
 ```
 
-## File Structure
+## Dependencies
 
-- `public/`: Contains static files (HTML, CSS, JavaScript).
-- `server.js`: Main server file.
-- `package.json`: Project dependencies and scripts.
-- `firebaseServiceAccountKey.json`: Firebase service account key (if using Firebase storage).
-
-## Next Features (Coming Soon)
-Here are some of the features planned for future releases:
-
-- File Expiration: Add an option to automatically delete files after a specified time.
-- Multiple File Upload: Support for uploading multiple files simultaneously.
-- Free Deploy: Support deploy any hosting
-- Library: Available at npmjs
-- Google Drive: Additions to the file storage
-
-## Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request.
+- **express**: Web framework for Node.js.
+- **multer**: Middleware for handling `multipart/form-data`, used for uploading files.
+- **fs**: Node.js built-in module for interacting with the file system.
+- **firebase-admin**: For Firebase integration (if using Firebase storage).
+- **googleapis**: For Google Drive integration (if applicable).
+- **dotenv**: For environment variable management.
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Author
-
-Developed by Romi Muharom
-
-- [Instagram](https://www.instagram.com/romi_muh05)
-- [GitHub](https://github.com/Leuthra)
-- [Website](https://romidev.tech)
-
-## Thank You
-
-Special thanks to [SazumiVicky](https://github.com/SazumiVicky/uploader-r2) for the reference code used in the uploader system.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

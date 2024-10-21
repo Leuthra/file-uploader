@@ -1,7 +1,7 @@
 {
-  "name": "uploader",
+  "name": "cdn-uploader",
   "version": "1.0.0",
-  "description": "",
+  "description": "cdn uploader for everyone use",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,6 +11,7 @@
   "author": "Romi Muharom",
   "license": "MIT",
   "dependencies": {
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "firebase-admin": "^12.5.0",

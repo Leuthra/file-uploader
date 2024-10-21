@@ -1,6 +1,4 @@
 node_modules
 package-lock.json
-.dist
-public/uploads
 .env
-firebaseServiceAccountKey.json
+firebase.json
